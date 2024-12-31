@@ -14,6 +14,9 @@ pub enum GCalError {
     #[error("認証エラー: {0}")]
     AuthError(String),
 
+    #[error("バリデーションエラー: {0}")]
+    ValidationError(String),
+
     #[error("その他エラー: {0}")]
     Other(String),
 }
