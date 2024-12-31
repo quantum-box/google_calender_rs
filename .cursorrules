@@ -1,0 +1,93 @@
+- If there is an error, explain the cause of the error
+- Do not omit details as much as possible
+- All messages in the code should be in English
+
+このリポジトリの基本技術スタックは以下である。
+- TypeScript
+    - React
+    - Next.js
+    - Tailwind CSS
+- Rust
+    - axum
+    - sqlx
+- MySQL(TiDB)
+- aws
+
+For *.md file
+- Use Japanese
+- Use PlantUML for diagrams
+- markdownのドキュメントにタスクを書く場合は、以下のように書く。タスクの進行度に応じて絵文字を変える。
+    - ✅ DONE
+    - ✅ DONE
+    - 🔄 IN PROGRESS
+    - 📝 TODO
+    - 📝 TODO
+    - 📝 TODO
+
+マイグレーションファイルは`sqlx`を使用して作成する。
+crateのディレクトリで `sqlx migrate add -r <name>`で作成できる。
+
+For Cargo.toml file
+- パッケージのバージョンは`0.1.0`から始める。
+- rootのCargo.tomlに書いてあるcrateを利用する場合は`workspace = true`を設定する。
+
+For *.rs file
+You are an expert in Rust.
+
+- Use `#[derive(Debug, Clone, PartialEq, Eq, EnumString, Display)]` for enums
+- idは全てULIDを全て小文字にしたものを使用する。def_id!(IdName, "prefix_")で生成できる。
+- Error Handling in Rust. use `errors::Result` for error handling.
+```rust
+use errors::Result;
+
+fn sample() -> Result<()> {w
+    Ok(())
+}
+```
+
+- Use `#[tokio::test]` for testing async functions.
+```rust
+#[tokio::test]
+async fn test_sample() {
+    let result = sample().await;
+    assert!(result.is_ok());
+}
+```
+
+
+
+For *.tsx file
+- As an expert in TypeScript, Node.js, Next.js App Router, React, Shadcn UI, Radix UI, and Tailwind CSS, write a web application that meets the following requirements:
+- Code Style and Structure:
+    - Write concise and technical TypeScript code.
+    - Use functional and declarative programming patterns, avoiding classes.
+    - Avoid code duplication, prioritizing iteration and modularization.
+    - Use descriptive variable names including auxiliary verbs (e.g., `isLoading`, `hasError`).
+    - Structure the file: exported components, subcomponents, helpers, static content, and types.
+- Naming Conventions:
+    - Use lowercase and dashes for directories (e.g., `components/auth-wizard`).
+    - Prefer named exports for components.
+- TypeScript Usage:
+    - Use TypeScript for all code. Prefer interfaces over types.
+    - Avoid enums, use maps instead.
+    - Use functional components with TypeScript interfaces.
+- Syntax and Formatting:
+    - Use the `function` keyword for pure functions.
+    - Avoid unnecessary curly braces in conditional statements, use concise syntax.
+    - Use declarative JSX.
+- UI and Styling:
+    - Use Shadcn UI, Radix, and Tailwind for components and styling.
+    - Implement responsive design with Tailwind CSS, using a mobile-first approach.
+- Performance Optimization:
+    - Minimize the use of `use client`, `useEffect`, and `setState`, prioritizing React Server Components (RSC).
+    - Wrap client components with Suspense and provide fallbacks.
+    - Use dynamic loading for non-critical components.
+    - Optimize images: use WebP format, include size data, and implement lazy loading.
+- Key Conventions:
+    - Use `nuqs` for URL search parameter state management.
+    - Optimize Web Vitals (LCP, CLS, FID).
+    - Limit the use of `use client`.
+    - Follow Next.js documentation for data fetching, rendering, and routing.
+- Development Environment:
+    - Install all necessary npm packages.
+    - Ensure the application is fully functional and can run in development mode.
