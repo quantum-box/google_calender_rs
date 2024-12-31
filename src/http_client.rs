@@ -9,6 +9,28 @@ pub struct HttpClient {
 }
 
 impl HttpClient {
+    #[cfg(test)]
+    pub fn mock() -> Result<Self> {
+        let config = GCalConfig {
+            api_base_url: "https://www.googleapis.com/calendar/v3".to_string(),
+            timeout_seconds: 30,
+        };
+        Ok(Self {
+            client: Client::new(),
+            config,
+        })
+    }
+
+    #[cfg(test)]
+    pub async fn mock_post_response(&self, _path: &str, json: impl serde::Serialize) -> Result<String> {
+        // モックレスポンスとして、リクエストされたイベントをそのまま返す
+        Ok(serde_json::to_string(&json)?)
+    }
+
+    pub fn base_url(&self) -> &str {
+        &self.config.api_base_url
+    }
+
     pub fn new(config: GCalConfig) -> Result<Self> {
         let client = Client::builder()
             .timeout(Duration::from_secs(config.timeout_seconds))
