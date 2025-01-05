@@ -1,6 +1,3 @@
-use crate::error::GCalError;
-use std::env;
-
 pub struct GCalConfig {
     pub api_base_url: String,
     pub timeout_seconds: u64,

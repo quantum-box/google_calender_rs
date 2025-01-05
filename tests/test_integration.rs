@@ -1,9 +1,6 @@
 use chrono::{Duration, Utc};
 use rust_template::{
-    config::GCalConfig,
-    calendar_client::CalendarClient,
-    event::Event,
-    http_client::HttpClient,
+    calendar_client::CalendarClient, config::GCalConfig, event::Event, http_client::HttpClient,
 };
 
 #[tokio::test]
