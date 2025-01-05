@@ -12,17 +12,22 @@ impl CalendarClient {
         CalendarClient { http_client }
     }
 
-    pub async fn create_event(&self, event: Event) -> Result<Event> {
+    pub async fn create_event(&self, calendar_id: &str, event: &Event) -> Result<Event> {
         // バリデーション
-        event
-            .validate()
-            .map_err(GCalError::ValidationError)?;
+        event.validate().map_err(GCalError::ValidationError)?;
+
+        // イベント作成のパスを構築
+        let path = format!("calendars/{}/events", calendar_id);
+
+        // Debug: Print the event JSON
+        let event_json = serde_json::to_string_pretty(event).unwrap();
+        println!("Request payload:\n{}", event_json);
 
         // HTTPクライアントでPOST
         #[cfg(test)]
-        let resp = self.http_client.mock_post_response("events", &event).await?;
+        let resp = self.http_client.mock_post_response(&path, event).await?;
         #[cfg(not(test))]
-        let resp = self.http_client.post("events", &event).await?;
+        let resp = self.http_client.post(&path, event).await?;
 
         // レスポンスをEvent構造体にデシリアライズ
         let created_event: Event = serde_json::from_str(&resp)?;
@@ -48,7 +53,8 @@ mod tests {
         let http_client = HttpClient::mock().expect("failed to create mock client");
         let client = CalendarClient::new(http_client);
         let event = create_test_event();
-        let result = client.create_event(event).await;
+        let calendar_id = "test_calendar";
+        let result = client.create_event(calendar_id, &event).await;
         assert!(result.is_ok());
     }
 
@@ -67,7 +73,8 @@ mod tests {
             end: None,
         };
 
-        let result = client.create_event(event).await;
+        let calendar_id = "test_calendar";
+        let result = client.create_event(calendar_id, &event).await;
         assert!(result.is_err());
         assert!(matches!(result.unwrap_err(), GCalError::ValidationError(_)));
     }
