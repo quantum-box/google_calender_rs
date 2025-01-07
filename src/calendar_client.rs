@@ -34,6 +34,22 @@ impl CalendarClient {
 
         Ok(created_event)
     }
+
+    /// 1つのイベントを取得
+    pub async fn get_event(&self, calendar_id: &str, event_id: &str) -> Result<Event> {
+        // GET /calendars/{calendarId}/events/{eventId} を実行
+        let path = format!("calendars/{}/events/{}", calendar_id, event_id);
+
+        // HTTPクライアントでGET
+        #[cfg(test)]
+        let resp = self.http_client.mock_get_response(&path).await?;
+        #[cfg(not(test))]
+        let resp = self.http_client.get(&path).await?;
+
+        // レスポンスをEvent構造体にデシリアライズ
+        let fetched_event: Event = serde_json::from_str(&resp)?;
+        Ok(fetched_event)
+    }
 }
 
 #[cfg(test)]
@@ -77,5 +93,17 @@ mod tests {
         let result = client.create_event(calendar_id, &event).await;
         assert!(result.is_err());
         assert!(matches!(result.unwrap_err(), GCalError::ValidationError(_)));
+    }
+
+    #[tokio::test]
+    async fn test_get_event_ok() {
+        let http_client = HttpClient::mock().expect("failed to create mock client");
+        let client = CalendarClient::new(http_client);
+        let calendar_id = "test_calendar";
+        let event_id = "test_event_123";
+        let result = client.get_event(calendar_id, event_id).await;
+        assert!(result.is_ok());
+        let fetched_event = result.unwrap();
+        assert_eq!(fetched_event.summary.as_deref(), Some("テスト会議"));
     }
 }
