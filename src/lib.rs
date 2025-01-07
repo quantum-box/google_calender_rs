@@ -3,6 +3,7 @@ pub mod config;
 pub mod error;
 pub mod event;
 pub mod http_client;
+pub mod timezone_utils;
 #[cfg(test)]
 pub mod mock;
 
