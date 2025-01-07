@@ -129,7 +129,7 @@ impl Event {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::{Duration, TimeZone, Utc};
+    use chrono::{Duration, Utc};
 
     #[test]
     fn test_validate_ok() {
