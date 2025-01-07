@@ -1,10 +1,5 @@
 use chrono::{Duration, Utc};
-use rust_template::{
-    calendar_client::CalendarClient,
-    config::GCalConfig,
-    event::Event,
-    http_client::HttpClient,
-};
+use rust_template::{calendar_client::CalendarClient, config::GCalConfig, event::Event, http_client::HttpClient};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
