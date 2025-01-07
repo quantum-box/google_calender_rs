@@ -1,5 +1,10 @@
 use chrono::{Duration, Utc};
-use rust_template::{calendar_client::CalendarClient, config::GCalConfig, event::Event, http_client::HttpClient};
+use rust_template::{
+    calendar_client::CalendarClient,
+    config::GCalConfig,
+    event::Event,
+    http_client::HttpClient,
+};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -25,7 +30,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         None, // タイムゾーン未指定の場合はUTCがデフォルト
     )?;
 
-    let created_utc_event = calendar_client.create_event(calendar_id, &utc_event).await?;
+    let created_utc_event = calendar_client
+        .create_event(calendar_id, &utc_event)
+        .await?;
     println!("UTCイベントが作成されました: {:?}", created_utc_event.id);
 
     // 2. 東京タイムゾーンでのイベント作成例
@@ -39,8 +46,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some("Asia/Tokyo".to_string()), // Region/City形式でのタイムゾーン指定
     )?;
 
-    let created_tokyo_event = calendar_client.create_event(calendar_id, &tokyo_event).await?;
-    println!("東京タイムゾーンイベントが作成されました: {:?}", created_tokyo_event.id);
+    let created_tokyo_event = calendar_client
+        .create_event(calendar_id, &tokyo_event)
+        .await?;
+    println!(
+        "東京タイムゾーンイベントが作成されました: {:?}",
+        created_tokyo_event.id
+    );
 
     // 3. GMTオフセットでのイベント作成例
     println!("\n3. GMTオフセットでのイベント作成");
@@ -53,8 +65,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some("GMT+09:00".to_string()), // GMTオフセット形式でのタイムゾーン指定
     )?;
 
-    let created_gmt_event = calendar_client.create_event(calendar_id, &gmt_event).await?;
-    println!("GMTオフセットイベントが作成されました: {:?}", created_gmt_event.id);
+    let created_gmt_event = calendar_client
+        .create_event(calendar_id, &gmt_event)
+        .await?;
+    println!(
+        "GMTオフセットイベントが作成されました: {:?}",
+        created_gmt_event.id
+    );
 
     Ok(())
 }
