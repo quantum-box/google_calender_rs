@@ -72,11 +72,19 @@ impl EventDateTime {
         }
 
         // GMT+/-XX:XX 形式
-        if tz.starts_with("GMT") {
-            let offset = &tz[3..];
-            if offset.starts_with('+') || offset.starts_with('-') {
-                if offset.len() == 6 && offset[4..5].contains(':') {
-                    return true;
+        if let Some(offset) = tz.strip_prefix("GMT") {
+            if (offset.starts_with('+') || offset.starts_with('-'))
+                && offset.len() == 6
+                && offset[4..5].contains(':')
+            {
+                // 時間部分が00-23の範囲内かチェック
+                if let Ok(hours) = offset[1..3].parse::<i32>() {
+                    if (0..=23).contains(&hours) {
+                        // 分部分が00-59の範囲内かチェック
+                        if let Ok(minutes) = offset[4..].parse::<i32>() {
+                            return (0..=59).contains(&minutes);
+                        }
+                    }
                 }
             }
         }
