@@ -3,6 +3,10 @@ name = "rust_template"
 version = "0.1.0"
 edition = "2021"
 
+[[example]]
+name = "timezone_examples"
+path = "examples/timezone_examples.rs"
+
 [dependencies]
 reqwest = { version = "0.11", features = ["json"] }
 tokio = { version = "1.0", features = ["full"] }
