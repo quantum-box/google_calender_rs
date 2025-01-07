@@ -5,9 +5,9 @@ use rust_template::{
 
 #[tokio::test]
 async fn test_create_event_in_real_api() {
-    // 1. Load credentials from "GOOGLE_CREDENTIAL"
-    let config = GCalConfig::from_env("GOOGLE_CREDENTIAL")
-        .expect("Failed to create config from GOOGLE_CREDENTIAL");
+    // 1. Load credentials from environment variable
+    let config = GCalConfig::from_env("GOOGLE_SA_SHEET_CRED")
+        .expect("Failed to create config from GOOGLE_SA_SHEET_CRED");
 
     // 2. Initialize HttpClient with config
     let http_client = HttpClient::new(config).expect("Failed to create HttpClient");

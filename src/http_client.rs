@@ -93,6 +93,13 @@ impl HttpClient {
         Ok(serde_json::to_string(&json)?)
     }
 
+    #[cfg(test)]
+    pub async fn mock_get_response(&self, _path: &str) -> Result<String> {
+        // テストイベントをJSONにしたものをレスポンスとして返す
+        let mock_event = crate::mock::test_utils::create_test_event();
+        Ok(serde_json::to_string(&mock_event)?)
+    }
+
     pub fn base_url(&self) -> &str {
         &self.config.api_base_url
     }
