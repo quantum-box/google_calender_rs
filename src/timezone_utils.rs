@@ -55,7 +55,7 @@ pub fn validate_timezone(tz: &str) -> bool {
         // +09:00 形式のチェック
         if offset.len() == 6
             && (offset.starts_with('+') || offset.starts_with('-'))
-            && offset[3..4] == ":"
+            && &offset[3..4] == ":"
             && offset[1..3].chars().all(|c| c.is_ascii_digit())
             && offset[4..6].chars().all(|c| c.is_ascii_digit())
         {
@@ -87,11 +87,13 @@ pub fn convert_to_timezone(dt: DateTime<Utc>, timezone: &str) -> Result<String, 
         // +09:00 形式のチェック
         if offset.len() == 6
             && (offset.starts_with('+') || offset.starts_with('-'))
-            && offset[3..4] == ":"
+            && &offset[3..4] == ":"
             && offset[1..3].chars().all(|c| c.is_ascii_digit())
             && offset[4..6].chars().all(|c| c.is_ascii_digit())
         {
-            if let (Ok(hours), Ok(minutes)) = (offset[1..3].parse::<i32>(), offset[4..6].parse::<i32>()) {
+            if let (Ok(hours), Ok(minutes)) =
+                (offset[1..3].parse::<i32>(), offset[4..6].parse::<i32>())
+            {
                 if (0..=23).contains(&hours) && (0..=59).contains(&minutes) {
                     let local_dt = dt.format("%Y-%m-%dT%H:%M:%S").to_string();
                     return Ok(format!("{}{}", local_dt, offset));
