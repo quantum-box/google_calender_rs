@@ -44,10 +44,12 @@ pub fn validate_timezone(tz: &str) -> bool {
             && offset[1..3].chars().all(|c| c.is_ascii_digit())
             && offset[5..].chars().all(|c| c.is_ascii_digit())
         {
-            let hours = offset[1..3].parse::<i32>().unwrap_or(24);
-            let minutes = offset[5..].parse::<i32>().unwrap_or(60);
-            if (0..=23).contains(&hours) && (0..=59).contains(&minutes) {
-                return true;
+            if let (Ok(hours), Ok(minutes)) = (offset[1..3].parse::<i32>(), offset[5..].parse::<i32>()) {
+                if (0..=23).contains(&hours) && (0..=59).contains(&minutes) {
+                    if let Ok(_) = chrono::FixedOffset::from_str(offset) {
+                        return true;
+                    }
+                }
             }
         }
     }
@@ -68,11 +70,20 @@ pub fn convert_to_timezone(dt: DateTime<Utc>, timezone: &str) -> Result<String, 
 
     // GMT+/-XX:XX形式の場合は、オフセットを解析して適用
     if let Some(offset) = timezone.strip_prefix("GMT") {
-        // GMTフォーマットの検証
-        if validate_timezone(timezone) {
-            if let Ok(fixed_offset) = chrono::FixedOffset::from_str(offset) {
-                let local_dt = dt.with_timezone(&fixed_offset);
-                return Ok(local_dt.format("%Y-%m-%dT%H:%M:%S%:z").to_string());
+        // +09:00 形式のチェック
+        if offset.len() == 6 
+            && (offset.starts_with('+') || offset.starts_with('-'))
+            && offset[4..5].contains(':')
+            && offset[1..3].chars().all(|c| c.is_ascii_digit())
+            && offset[5..].chars().all(|c| c.is_ascii_digit())
+        {
+            let hours = offset[1..3].parse::<i32>().unwrap_or(24);
+            let minutes = offset[5..].parse::<i32>().unwrap_or(60);
+            if (0..=23).contains(&hours) && (0..=59).contains(&minutes) {
+                if let Ok(fixed_offset) = chrono::FixedOffset::from_str(offset) {
+                    let local_dt = dt.with_timezone(&fixed_offset);
+                    return Ok(local_dt.format("%Y-%m-%dT%H:%M:%S%:z").to_string());
+                }
             }
         }
         return Err(TimezoneError::InvalidTimezone(timezone.to_string()));
