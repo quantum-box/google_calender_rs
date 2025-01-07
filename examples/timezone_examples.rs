@@ -11,7 +11,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let calendar_client = CalendarClient::new(http_client);
 
     // カレンダーIDの設定
-    let calendar_id = "your_calendar_id@group.calendar.google.com";
+    let calendar_id = "5e36da154f2b36a2ad38a79ef17b50626677582ca51d69bf8461003a4a90e20b@group.calendar.google.com";
 
     // 1. UTCでのイベント作成例
     println!("1. UTCでのイベント作成");
