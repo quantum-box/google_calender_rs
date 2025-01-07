@@ -1,4 +1,4 @@
-use chrono::{DateTime, TimeZone, Utc};
+use chrono::{DateTime, Utc};
 use std::str::FromStr;
 
 /// タイムゾーン変換に関するエラー

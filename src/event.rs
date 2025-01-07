@@ -50,7 +50,7 @@ impl EventDateTime {
         }
 
         Ok(EventDateTime {
-            date_time: dt.format("%Y-%m-%dT%H:%M:%S").to_string(),
+            date_time: dt.to_rfc3339(),
             time_zone,
         })
     }
