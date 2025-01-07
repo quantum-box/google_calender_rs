@@ -59,9 +59,9 @@ pub fn validate_timezone(tz: &str) -> bool {
             && offset[1..3].chars().all(|c| c.is_ascii_digit())
             && offset[5..].chars().all(|c| c.is_ascii_digit())
         {
-            let hours = offset[1..3].parse::<i32>().unwrap_or(24);
-            let minutes = offset[5..].parse::<i32>().unwrap_or(60);
-            return (0..=23).contains(&hours) && (0..=59).contains(&minutes);
+            if let (Ok(hours), Ok(minutes)) = (offset[1..3].parse::<i32>(), offset[5..].parse::<i32>()) {
+                return (0..=23).contains(&hours) && (0..=59).contains(&minutes);
+            }
         }
         return false;
     }
@@ -83,9 +83,18 @@ pub fn convert_to_timezone(dt: DateTime<Utc>, timezone: &str) -> Result<String, 
     // GMT+/-XX:XX形式の場合は、オフセットを解析して適用
     if let Some(offset) = timezone.strip_prefix("GMT") {
         // +09:00 形式のチェック
-        if validate_timezone(timezone) {
-            let local_dt = dt.format("%Y-%m-%dT%H:%M:%S").to_string();
-            return Ok(format!("{}{}", local_dt, offset));
+        if offset.len() == 6
+            && (offset.starts_with('+') || offset.starts_with('-'))
+            && offset[4..5].contains(':')
+            && offset[1..3].chars().all(|c| c.is_ascii_digit())
+            && offset[5..].chars().all(|c| c.is_ascii_digit())
+        {
+            let hours = offset[1..3].parse::<i32>().unwrap_or(24);
+            let minutes = offset[5..].parse::<i32>().unwrap_or(60);
+            if (0..=23).contains(&hours) && (0..=59).contains(&minutes) {
+                let local_dt = dt.format("%Y-%m-%dT%H:%M:%S").to_string();
+                return Ok(format!("{}{}", local_dt, offset));
+            }
         }
         return Err(TimezoneError::InvalidTimezone(timezone.to_string()));
     }
