@@ -37,18 +37,17 @@ pub fn validate_timezone(tz: &str) -> bool {
 
     // GMT+/-XX:XX 形式
     if let Some(offset) = tz.strip_prefix("GMT") {
-        if (offset.starts_with('+') || offset.starts_with('-'))
-            && offset.len() == 6
+        // +09:00 形式のチェック
+        if offset.len() == 6 
+            && (offset.starts_with('+') || offset.starts_with('-'))
             && offset[4..5].contains(':')
+            && offset[1..3].chars().all(|c| c.is_ascii_digit())
+            && offset[5..].chars().all(|c| c.is_ascii_digit())
         {
-            // 時間部分が00-23の範囲内かチェック
-            if let Ok(hours) = offset[1..3].parse::<i32>() {
-                if (0..=23).contains(&hours) {
-                    // 分部分が00-59の範囲内かチェック
-                    if let Ok(minutes) = offset[4..].parse::<i32>() {
-                        return (0..=59).contains(&minutes);
-                    }
-                }
+            let hours = offset[1..3].parse::<i32>().unwrap_or(24);
+            let minutes = offset[5..].parse::<i32>().unwrap_or(60);
+            if (0..=23).contains(&hours) && (0..=59).contains(&minutes) {
+                return true;
             }
         }
     }
