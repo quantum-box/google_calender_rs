@@ -5,6 +5,7 @@ pub mod event;
 pub mod http_client;
 #[cfg(test)]
 pub mod mock;
+pub mod timezone_utils;
 
 pub use calendar_client::CalendarClient;
 pub use event::Event;

@@ -20,9 +20,39 @@ pub struct Event {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct EventDateTime {
     #[serde(rename = "dateTime")]
-    date_time: String,
+    pub date_time: String,
     #[serde(rename = "timeZone")]
-    time_zone: String,
+    pub time_zone: String,
+}
+
+impl EventDateTime {
+    /// Creates a new EventDateTime with the given datetime string and timezone
+    pub fn new(date_time: String, time_zone: String) -> Result<Self, String> {
+        // タイムゾーン文字列の検証にtimezone_utilsを使用
+        if !crate::timezone_utils::validate_timezone(&time_zone) {
+            return Err(format!("無効なタイムゾーン文字列です: {}", time_zone));
+        }
+
+        Ok(EventDateTime {
+            date_time,
+            time_zone,
+        })
+    }
+
+    /// Creates an EventDateTime from a DateTime and timezone string
+    pub fn from_datetime_with_tz<Tz: chrono::TimeZone>(
+        dt: DateTime<Tz>,
+        time_zone: String,
+    ) -> Result<Self, String> {
+        if !crate::timezone_utils::validate_timezone(&time_zone) {
+            return Err(format!("無効なタイムゾーン文字列です: {}", time_zone));
+        }
+
+        Ok(EventDateTime {
+            date_time: dt.to_rfc3339(),
+            time_zone,
+        })
+    }
 }
 
 impl Event {
@@ -32,22 +62,30 @@ impl Event {
         end: DateTime<Utc>,
         description: Option<String>,
         location: Option<String>,
-    ) -> Self {
-        Event {
+        time_zone: Option<String>,
+    ) -> Result<Self, String> {
+        // タイムゾーンのデフォルト値はUTC
+        let tz = time_zone.unwrap_or_else(|| "UTC".to_string());
+
+        // タイムゾーンの検証
+        if !crate::timezone_utils::validate_timezone(&tz) {
+            return Err(format!("無効なタイムゾーン文字列です: {}", tz));
+        }
+
+        // start EventDateTimeの作成
+        let start_dt = EventDateTime::from_datetime_with_tz(start, tz.clone())?;
+        // end EventDateTimeの作成
+        let end_dt = EventDateTime::from_datetime_with_tz(end, tz)?;
+
+        Ok(Event {
             id: None,
             status: None,
             summary: Some(summary),
             description,
             location,
-            start: Some(EventDateTime {
-                date_time: start.format("%Y-%m-%dT%H:%M:%SZ").to_string(),
-                time_zone: "UTC".to_string(),
-            }),
-            end: Some(EventDateTime {
-                date_time: end.format("%Y-%m-%dT%H:%M:%SZ").to_string(),
-                time_zone: "UTC".to_string(),
-            }),
-        }
+            start: Some(start_dt),
+            end: Some(end_dt),
+        })
     }
 
     pub fn validate(&self) -> Result<(), String> {
@@ -61,6 +99,7 @@ impl Event {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chrono::{Duration, Utc};
 
     #[test]
     fn test_validate_ok() {
@@ -88,5 +127,57 @@ mod tests {
             end: None,
         };
         assert!(ev.validate().is_err());
+    }
+
+    #[test]
+    fn test_new_with_utc() {
+        let start = Utc::now();
+        let end = start + Duration::hours(1);
+        let event = Event::new(
+            "テストイベント".to_string(),
+            start,
+            end,
+            Some("説明".to_string()),
+            Some("場所".to_string()),
+            None,
+        );
+        assert!(event.is_ok());
+        let event = event.unwrap();
+        assert_eq!(event.summary, Some("テストイベント".to_string()));
+        assert_eq!(event.start.unwrap().time_zone, "UTC");
+        assert_eq!(event.end.unwrap().time_zone, "UTC");
+    }
+
+    #[test]
+    fn test_new_with_tokyo_timezone() {
+        let start = Utc::now();
+        let end = start + Duration::hours(1);
+        let event = Event::new(
+            "テストイベント".to_string(),
+            start,
+            end,
+            Some("説明".to_string()),
+            Some("場所".to_string()),
+            Some("Asia/Tokyo".to_string()),
+        );
+        assert!(event.is_ok());
+        let event = event.unwrap();
+        assert_eq!(event.start.unwrap().time_zone, "Asia/Tokyo");
+        assert_eq!(event.end.unwrap().time_zone, "Asia/Tokyo");
+    }
+
+    #[test]
+    fn test_new_with_invalid_timezone() {
+        let start = Utc::now();
+        let end = start + Duration::hours(1);
+        let event = Event::new(
+            "テストイベント".to_string(),
+            start,
+            end,
+            Some("説明".to_string()),
+            Some("場所".to_string()),
+            Some("Invalid/Timezone".to_string()),
+        );
+        assert!(event.is_err());
     }
 }

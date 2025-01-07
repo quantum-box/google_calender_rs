@@ -1,6 +1,6 @@
 #[cfg(test)]
 pub mod test_utils {
-    use crate::event::{Event, EventDateTime};
+    use crate::event::Event;
     use chrono::{Duration, Utc};
 
     pub fn create_test_event() -> Event {
@@ -11,6 +11,8 @@ pub mod test_utils {
             now + Duration::hours(1),
             Some("テストの説明".to_string()),
             None,
+            None, // デフォルトでUTCを使用
         )
+        .expect("テストイベントの作成に失敗")
     }
 }
