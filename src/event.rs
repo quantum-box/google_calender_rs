@@ -68,7 +68,7 @@ impl Event {
         let tz = time_zone.unwrap_or_else(|| "UTC".to_string());
 
         // タイムゾーンの検証
-        if !EventDateTime::is_valid_timezone(&tz) {
+        if !crate::timezone_utils::validate_timezone(&tz) {
             return Err(format!("無効なタイムゾーン文字列です: {}", tz));
         }
 
