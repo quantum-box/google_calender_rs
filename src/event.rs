@@ -74,7 +74,7 @@ impl EventDateTime {
         // GMT+/-XX:XX 形式
         if let Some(offset) = tz.strip_prefix("GMT") {
             // +09:00 形式のチェック
-            if offset.len() == 6 
+            if offset.len() == 6
                 && (offset.starts_with('+') || offset.starts_with('-'))
                 && offset[4..5].contains(':')
                 && offset[1..3].chars().all(|c| c.is_ascii_digit())
