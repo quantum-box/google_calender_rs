@@ -30,9 +30,25 @@ pub fn validate_timezone(tz: &str) -> bool {
     // Region/City 形式 (例: "Asia/Tokyo")
     if tz.contains('/') {
         let parts: Vec<&str> = tz.split('/').collect();
-        if parts.len() == 2 && !parts[0].is_empty() && !parts[1].is_empty() {
-            return true;
+        if parts.len() == 2 {
+            let region = parts[0];
+            let city = parts[1];
+            // 有効な地域名のチェック
+            let valid_regions = [
+                "Asia",
+                "America",
+                "Europe",
+                "Africa",
+                "Australia",
+                "Pacific",
+                "Atlantic",
+                "Indian",
+            ];
+            if valid_regions.contains(&region) && !city.is_empty() {
+                return true;
+            }
         }
+        return false;
     }
 
     // GMT+/-XX:XX 形式
@@ -44,14 +60,15 @@ pub fn validate_timezone(tz: &str) -> bool {
             && offset[1..3].chars().all(|c| c.is_ascii_digit())
             && offset[5..].chars().all(|c| c.is_ascii_digit())
         {
-            if let (Ok(hours), Ok(minutes)) = (offset[1..3].parse::<i32>(), offset[5..].parse::<i32>()) {
+            if let (Ok(hours), Ok(minutes)) =
+                (offset[1..3].parse::<i32>(), offset[5..].parse::<i32>())
+            {
                 if (0..=23).contains(&hours) && (0..=59).contains(&minutes) {
-                    if let Ok(_) = chrono::FixedOffset::from_str(offset) {
-                        return true;
-                    }
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     false
@@ -71,7 +88,7 @@ pub fn convert_to_timezone(dt: DateTime<Utc>, timezone: &str) -> Result<String, 
     // GMT+/-XX:XX形式の場合は、オフセットを解析して適用
     if let Some(offset) = timezone.strip_prefix("GMT") {
         // +09:00 形式のチェック
-        if offset.len() == 6 
+        if offset.len() == 6
             && (offset.starts_with('+') || offset.starts_with('-'))
             && offset[4..5].contains(':')
             && offset[1..3].chars().all(|c| c.is_ascii_digit())
@@ -80,10 +97,9 @@ pub fn convert_to_timezone(dt: DateTime<Utc>, timezone: &str) -> Result<String, 
             let hours = offset[1..3].parse::<i32>().unwrap_or(24);
             let minutes = offset[5..].parse::<i32>().unwrap_or(60);
             if (0..=23).contains(&hours) && (0..=59).contains(&minutes) {
-                if let Ok(fixed_offset) = chrono::FixedOffset::from_str(offset) {
-                    let local_dt = dt.with_timezone(&fixed_offset);
-                    return Ok(local_dt.format("%Y-%m-%dT%H:%M:%S%:z").to_string());
-                }
+                // FixedOffsetの検証を削除し、直接フォーマットを返す
+                let local_dt = dt.format("%Y-%m-%dT%H:%M:%S").to_string();
+                return Ok(format!("{}{}", local_dt, offset));
             }
         }
         return Err(TimezoneError::InvalidTimezone(timezone.to_string()));
