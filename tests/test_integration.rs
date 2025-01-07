@@ -3,7 +3,8 @@ use rust_template::{
     calendar_client::CalendarClient, config::GCalConfig, event::Event, http_client::HttpClient,
 };
 
-const CALENDAR_ID: &str = "5e36da154f2b36a2ad38a79ef17b50626677582ca51d69bf8461003a4a90e20b@group.calendar.google.com";
+const CALENDAR_ID: &str =
+    "5e36da154f2b36a2ad38a79ef17b50626677582ca51d69bf8461003a4a90e20b@group.calendar.google.com";
 
 async fn setup_calendar_client() -> CalendarClient {
     let config = GCalConfig::from_env("GOOGLE_SA_SHEET_CRED")
@@ -27,7 +28,8 @@ async fn test_create_event_in_real_api() {
         Some("This event was created by an integration test".to_string()),
         Some("Online".to_string()),
         None, // デフォルトでUTC
-    ).expect("Failed to create event");
+    )
+    .expect("Failed to create event");
 
     let created_event = calendar_client
         .create_event(CALENDAR_ID, &event)
@@ -44,7 +46,10 @@ async fn test_create_event_in_real_api() {
         Some("This event was created by an integration test".to_string())
     );
     assert_eq!(created_event.location, Some("Online".to_string()));
-    assert!(created_event.id.is_some(), "Created event should have an ID");
+    assert!(
+        created_event.id.is_some(),
+        "Created event should have an ID"
+    );
     assert_eq!(created_event.start.unwrap().time_zone, "UTC");
     assert_eq!(created_event.end.unwrap().time_zone, "UTC");
 
@@ -66,7 +71,8 @@ async fn test_create_event_with_tokyo_timezone() {
         Some("This event was created with Asia/Tokyo timezone".to_string()),
         Some("Tokyo".to_string()),
         Some("Asia/Tokyo".to_string()),
-    ).expect("Failed to create event");
+    )
+    .expect("Failed to create event");
 
     let created_event = calendar_client
         .create_event(CALENDAR_ID, &event)
@@ -83,7 +89,10 @@ async fn test_create_event_with_tokyo_timezone() {
         Some("This event was created with Asia/Tokyo timezone".to_string())
     );
     assert_eq!(created_event.location, Some("Tokyo".to_string()));
-    assert!(created_event.id.is_some(), "Created event should have an ID");
+    assert!(
+        created_event.id.is_some(),
+        "Created event should have an ID"
+    );
     assert_eq!(created_event.start.unwrap().time_zone, "Asia/Tokyo");
     assert_eq!(created_event.end.unwrap().time_zone, "Asia/Tokyo");
 
